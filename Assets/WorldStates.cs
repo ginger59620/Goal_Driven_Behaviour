@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,11 @@ public class WorldState
 {
     public string key;
     public int value;
+
+    internal Dictionary<string, int> GetStates()
+    {
+        throw new NotImplementedException();
+    }
 }
 public class WorldStates
 {
