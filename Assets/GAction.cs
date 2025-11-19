@@ -8,7 +8,7 @@ public abstract class GAction : MonoBehaviour
     public string actionName = "Action";
     public float cost = 1.0f;
     public GameObject target;
-    public GameObject targerTag;
+    public string targetTag;
     public float duration = 0;
     public WorldState[] preConditions;
     public WorldState[] afterEffects;
@@ -56,5 +56,5 @@ public abstract class GAction : MonoBehaviour
         return true;
     }
     public abstract bool PrePerform();
-    public abstract bool PosrPerform();
+    public abstract bool PostPerform();
 }
