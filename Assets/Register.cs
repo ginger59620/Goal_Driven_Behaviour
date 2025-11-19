@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GoToHospital : GAction
+public class Register : GAction
 {
     public override bool PrePerform()
     {

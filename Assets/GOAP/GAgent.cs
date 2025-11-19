@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -15,59 +15,60 @@ public class SubGoal
         remove = r;
     }
 }
+
 public class GAgent : MonoBehaviour
 {
-    public List<GAction> action = new List<GAction>();
+    public List<GAction> actions = new List<GAction>();
     public Dictionary<SubGoal, int> goals = new Dictionary<SubGoal, int>();
+    public WorldStates beliefs = new WorldStates();
 
     GPlanner planner;
-    Queue<GAction> actionsQueue;
+    Queue<GAction> actionQueue;
     public GAction currentAction;
     SubGoal currentGoal;
 
     // Start is called before the first frame update
-    protected virtual void Start()
+    public void Start()
     {
         GAction[] acts = this.GetComponents<GAction>();
         foreach (GAction a in acts)
-            action.Add(a);
+            actions.Add(a);
     }
 
-    bool invoke = false;
+
+    bool invoked = false;
     void CompleteAction()
     {
         currentAction.running = false;
         currentAction.PostPerform();
-        invoke = false;
+        invoked = false;
     }
-    // Update is called once per frame
+
     void LateUpdate()
     {
-        if(currentAction != null && currentAction.running)
+        if (currentAction != null && currentAction.running)
         {
-            float distanceToTarget = Vector3.Distance(currentAction.target.transform.position, this.transform.position);
-            if(currentAction.agent.hasPath && distanceToTarget < 2f) //currentAction.agent.remainingDistance < 1f)
+            if (currentAction.agent.hasPath && currentAction.agent.remainingDistance < 1f)
             {
-                Debug.Log("Distance to Goal: " + currentAction.agent.remainingDistance);
-                if(!invoke)
+                if (!invoked)
                 {
                     Invoke("CompleteAction", currentAction.duration);
-                    invoke = true;
+                    invoked = true;
                 }
             }
             return;
         }
 
-        if(planner == null || actionsQueue == null )
+        if (planner == null || actionQueue == null)
         {
             planner = new GPlanner();
 
             var sortedGoals = from entry in goals orderby entry.Value descending select entry;
 
-            foreach(KeyValuePair<SubGoal, int> sg in sortedGoals)
+            foreach (KeyValuePair<SubGoal, int> sg in sortedGoals)
             {
-                actionsQueue = planner.plan(action, sg.Key.sgoals, null);
-                if(actionsQueue != null)
+                actionQueue = planner.plan(actions, sg.Key.sgoals, null);
+                if (actionQueue != null)
                 {
                     currentGoal = sg.Key;
                     break;
@@ -75,24 +76,24 @@ public class GAgent : MonoBehaviour
             }
         }
 
-        if(actionsQueue != null && actionsQueue.Count == 0)
+        if (actionQueue != null && actionQueue.Count == 0)
         {
-            if(currentGoal.remove)
+            if (currentGoal.remove)
             {
                 goals.Remove(currentGoal);
             }
             planner = null;
         }
 
-        if(actionsQueue != null && actionsQueue.Count > 0)
+        if (actionQueue != null && actionQueue.Count > 0)
         {
-            currentAction = actionsQueue.Dequeue();
-            if(currentAction.PrePerform())
+            currentAction = actionQueue.Dequeue();
+            if (currentAction.PrePerform())
             {
                 if (currentAction.target == null && currentAction.targetTag != "")
                     currentAction.target = GameObject.FindWithTag(currentAction.targetTag);
 
-                if(currentAction.target != null)
+                if (currentAction.target != null)
                 {
                     currentAction.running = true;
                     currentAction.agent.SetDestination(currentAction.target.transform.position);
@@ -100,9 +101,10 @@ public class GAgent : MonoBehaviour
             }
             else
             {
-                actionsQueue = null;
+                actionQueue = null;
             }
+
         }
+
     }
-  
 }
